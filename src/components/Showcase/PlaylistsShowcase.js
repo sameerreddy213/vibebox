@@ -11,8 +11,8 @@ function PlaylistsShowcase(props) { //setDetails (for player), playlistId
 
     const getDetails = async () => {
         try {
-            // According to API spec: /api/playlists?id={id}
-            const uri = `/api/playlists?id=${props.playlistId}`
+            // According to API spec: /api/playlists?id={id}&limit={n}
+            const uri = `/api/playlists?id=${props.playlistId}&limit=100`
 
             props.setProgress(30)
             const response = await fetch(uri)

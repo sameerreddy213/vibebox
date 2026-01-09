@@ -111,8 +111,30 @@ function Player(props) {
     useEffect(() => {
         if (!props.details) return;
 
+        // Save to Recently Played
+        const addToHistory = (song) => {
+            let history = JSON.parse(localStorage.getItem('recentlyPlayed') || '[]');
+            // Remove if exists (to move to top)
+            history = history.filter(item => item.id !== song.id);
+            // Add to front
+            history.unshift(song);
+            // Limit to 20
+            if (history.length > 20) history.pop();
+            localStorage.setItem('recentlyPlayed', JSON.stringify(history));
+        }
+        addToHistory(props.details);
+
+
         document.title = `Playing ${props.details.name.replace(/&quot;/g, '"')} - VibeBox`
         const audio = audioRef.current;
+
+        const downloadUrl = props.details.downloadUrl && props.details.downloadUrl.length > 0 ? (props.details.downloadUrl[props.details.downloadUrl.length - 1].url || '') : '';
+
+        if (!downloadUrl) {
+            console.warn("No download URL found for song:", props.details.name);
+            setIsPlaying(false);
+            return;
+        }
 
         // Auto play when details change
         audio.pause();
@@ -121,7 +143,13 @@ function Player(props) {
         const setAudioData = () => {
             setDuration(audio.duration);
             setIsPlaying(true)
-            audio.play().catch(e => console.log("Autoplay prevented", e));
+            var playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error("Autoplay prevented or failed:", error);
+                    setIsPlaying(false);
+                });
+            }
         };
 
         const updateTime = () => setCurrentTime(audio.currentTime);
@@ -150,11 +178,13 @@ function Player(props) {
 
     const handlePlayPause = () => {
         const audio = audioRef.current;
+        if (!audio || !audio.src) return;
+
         if (isPlaying) {
             audio.pause();
             setIsPlaying(false);
         } else {
-            audio.play();
+            audio.play().catch(e => console.error("Play failed", e));
             setIsPlaying(true);
         }
     }
@@ -228,11 +258,78 @@ function Player(props) {
 
 
 
+    // Lyrics State
+    const [showLyrics, setShowLyrics] = useState(false);
+    const [lyrics, setLyrics] = useState(null);
+    const [lyricsLoading, setLyricsLoading] = useState(false);
+
+    const fetchLyrics = async () => {
+        if (!props.details) return;
+        setLyricsLoading(true);
+        setLyrics(null);
+        try {
+            const uri = `/api/lyrics?id=${props.details.id}`;
+            const response = await fetch(uri);
+            const data = await response.json();
+            if (data.success && data.data) {
+                setLyrics(data.data);
+            } else {
+                setLyrics(null);
+            }
+        } catch (e) {
+            console.error("Lyrics fetch failed", e);
+            setLyrics(null);
+        }
+        setLyricsLoading(false);
+    }
+
+    useEffect(() => {
+        if (showLyrics) {
+            fetchLyrics();
+        }
+    }, [showLyrics, props.details?.id]);
+
+    // Helpers for Lyrics Syncing (if lyrics.lyrics is synced)
+    // Assuming API returns { lyrics: "..." } plain text or synced JSON
+    // Currently most unofficial APIs return plain text or simple HTML.
+    // If it's plain text, we just show it.
+
     // Hide player if no song is selected
     if (!props.details) return null;
 
     return (
         <>
+            {/* Lyrics Overlay */}
+            {showLyrics && (
+                <div className="fixed inset-0 z-[70] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 transition-opacity duration-300">
+                    <button
+                        onClick={() => setShowLyrics(false)}
+                        className="absolute top-6 right-6 text-white hover:text-gray-300 z-[80]"
+                    >
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+
+                    <div className="w-full max-w-2xl text-center overflow-y-auto h-full scrollbar-hide py-10">
+                        <h2 className="text-2xl font-bold text-white mb-2">{props.details.name.replace(/&quot;/g, '"')}</h2>
+                        <p className="text-gray-400 mb-8">{props.details.artists?.primary?.map(a => a.name).join(', ')}</p>
+
+                        {lyricsLoading ? (
+                            <div className="flex justify-center"><div className="w-8 h-8 border-4 border-[#1db954] border-t-transparent rounded-full animate-spin"></div></div>
+                        ) : lyrics ? (
+                            <div className="text-xl md:text-2xl leading-loose font-medium text-gray-300 whitespace-pre-line">
+                                {lyrics.lyrics || lyrics.snippet || "Lyrics not available."}
+                                {lyrics.copyright && <p className="text-xs text-gray-600 mt-8">© {lyrics.copyright}</p>}
+                            </div>
+                        ) : (
+                            <div className="text-gray-500">
+                                <p className="mb-4">Lyrics not available for this song.</p>
+                                <p className="text-xs">Note: Synced lyrics support depends on the API provider.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Full Screen Player Overlay (Mobile) */}
             <div className={`fixed inset-0 z-[60] bg-gradient-to-b from-[#2b2b2b] to-black flex flex-col p-6 transition-transform duration-300 md:hidden ${isFullScreen ? 'translate-y-0' : 'translate-y-full'}`}>
 
@@ -242,15 +339,19 @@ function Player(props) {
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </button>
                     <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">Now Playing</span>
-                    <div className="w-8"></div> {/* Spacer */}
+                    {/* Lyrics Button Mobile */}
+                    <button onClick={() => setShowLyrics(true)} className="text-gray-400 hover:text-white p-2" title="Lyrics">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 3-2 3-2zm0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M9 19v2m12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 3-2 3-2z" /></svg>
+                    </button>
                 </div>
 
                 {/* Artwork */}
                 <div className="flex-1 flex items-center justify-center mb-6 overflow-hidden">
                     <img
-                        src={props.details.image && props.details.image.length > 0 ? props.details.image[props.details.image.length - 1].url : ''}
+                        src={props.details.image && props.details.image.length > 0 ? (props.details.image[props.details.image.length - 1].url || '') : ''}
                         alt="cover"
                         className="w-auto h-[40vh] max-h-[300px] md:max-h-full aspect-square object-cover rounded-lg shadow-2xl"
+                        onError={(e) => { e.target.src = 'https://www.scdn.co/i/_global/twitter_card-default.jpg' }}
                     />
                 </div>
 
@@ -258,7 +359,7 @@ function Player(props) {
                 <div className="mb-6">
                     <div className="flex items-center justify-between px-2">
                         <div className="flex flex-col overflow-hidden max-w-[85%] w-full">
-                            <Marquee text={props.details.name.replace(/&quot;/g, '"')} className="text-2xl font-bold text-white mb-1" />
+                            <Marquee text={props.details.name ? props.details.name.replace(/&quot;/g, '"') : ''} className="text-2xl font-bold text-white mb-1" />
                             <p className="text-lg text-gray-400 truncate text-left">
                                 {props.details.artists?.primary?.map(a => a.name).join(', ') || props.details.primaryArtists || 'Unknown'}
                             </p>
@@ -346,17 +447,18 @@ function Player(props) {
                     ></div>
                 </div>
 
-                <audio ref={audioRef} src={props.details.downloadUrl && props.details.downloadUrl.length > 0 ? props.details.downloadUrl[props.details.downloadUrl.length - 1].url : ''} />
+                <audio ref={audioRef} src={props.details.downloadUrl && props.details.downloadUrl.length > 0 ? (props.details.downloadUrl[props.details.downloadUrl.length - 1].url || '') : ''} />
 
                 {/* Left: Song Info */}
                 <div className="flex items-center flex-1 min-w-0 max-w-full md:max-w-[30%] mr-4">
                     <img
-                        src={props.details.image && props.details.image.length > 0 ? props.details.image[props.details.image.length - 1].url : ''}
+                        src={props.details.image && props.details.image.length > 0 ? (props.details.image[props.details.image.length - 1].url || '') : ''}
                         alt="cover"
                         className="h-12 w-12 md:h-14 md:w-14 object-cover rounded shadow-md mr-3"
+                        onError={(e) => { e.target.src = 'https://www.scdn.co/i/_global/twitter_card-default.jpg' }}
                     />
                     <div className="flex flex-col truncate pr-2 w-full">
-                        <Marquee text={props.details.name.replace(/&quot;/g, '"')} className="text-sm font-semibold hover:underline cursor-pointer text-white" />
+                        <Marquee text={props.details.name ? props.details.name.replace(/&quot;/g, '"') : ''} className="text-sm font-semibold hover:underline cursor-pointer text-white" />
                         <span className="text-xs text-gray-400 truncate hover:text-white cursor-pointer">
                             {props.details.artists?.primary?.map(a => a.name).join(', ') || props.details.primaryArtists || 'Unknown'}
                         </span>
@@ -426,11 +528,16 @@ function Player(props) {
 
                 {/* Right: Volume & Download (Desktop Only) */}
                 <div className="hidden md:flex items-center justify-end w-[30%] gap-4">
+                    {/* Lyrics Button Desktop */}
+                    <button onClick={() => setShowLyrics(true)} className="text-gray-400 hover:text-white" title="Lyrics">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 3-2 3-2zm0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M9 19v2m12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 3-2 3-2z" /></svg>
+                    </button>
                     <button onClick={downloadSong} className="text-gray-400 hover:text-white" title="Download Song">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                     </button>
+
 
                     <div className="flex items-center gap-2 w-24">
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

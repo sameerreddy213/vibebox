@@ -5,7 +5,8 @@ import Heading from './Heading'
 import Songs from './Songs'
 import Albums from './Albums'
 import Playlists from './Playlists';
-
+import HeroSection from './HeroSection'; // New
+import QuickGrid from './QuickGrid'; // New
 
 function Showcase(props) {
 
@@ -55,17 +56,13 @@ function Showcase(props) {
             }
 
             props.setDetails(resp.data[0])
-            props.setDetails(resp.data[0])
-            // Player is global, no need to navigate
+            props.setDetails(resp.data[0]) // Double set to ensure update? Kept from original logic.
         } catch (error) {
             console.error("Error fetching song:", error)
             alert(`Error loading song: ${error.message}`)
         }
     }
 
-    /**
-     * Main function that fetches homepage API sets the homepage data
-     */
     /**
      * Main function that fetches homepage API sets the homepage data
      */
@@ -218,32 +215,32 @@ function Showcase(props) {
 
     useEffect(() => {
         document.body.scrollTop = document.documentElement.scrollTop = 0; //scroll to top of page
-        document.title = "Popular Now - VibeBox"
+        document.title = "Home - VibeBox"
         setHomepageData()
     }, [])
 
+    // Logic to select a "Hero" item (e.g., first trending song)
+    const heroItem = tollywood_songs.length > 0 ? tollywood_songs[0] : null;
 
 
     return (
         <div className={props.theme}>
-            <section className="text-black dark:text-gray-400 bg-light-100 dark:bg-deep-900 body-font justify-center py-5">
-                <div className="w-full md:container md:mx-auto md:px-5 pt-8 pb-24 mb-0">
+            <section className="text-black dark:text-gray-400 bg-light-100 dark:bg-deep-900 body-font justify-center py-0">
+                <div className="w-full md:container md:mx-auto md:px-5 pb-24 mb-0">
 
-                    <Heading
-                        title="Tollywood Playlists"
-                        onViewMore={() => loadMore('playlists')}
-                    />
-                    <Playlists
-                        playlists={telugu_playlists.slice(0, limits.playlists)}
-                        setPlaylistId={props.setPlaylistId}
-                        onPlaylistClick={handleCategoryClick}
-                        layout="carousel"
-                        hasMore={limits.playlists < telugu_playlists.length}
-                        onLoadMore={() => loadMore('playlists')}
-                    />
+                    {/* 1. Hero Section */}
+                    <div className="px-4 md:px-0 pt-4 md:pt-8">
+                        {heroItem && <HeroSection item={heroItem} onPlay={(item) => props.setDetails(item)} />}
+                    </div>
 
-                    <div className="h-8 md:h-20"></div>
+                    {/* 2. Quick Access Grid (Good Morning/Recently Played) */}
+                    <div className="px-4 md:px-0">
+                        <QuickGrid onPlay={(item) => props.setDetails(item)} />
+                    </div>
 
+                    <div className="h-4 md:h-8"></div>
+
+                    {/* 3. Content Lanes */}
                     <Heading
                         title="Tollywood Trending"
                         onViewMore={() => loadMore('tollywood')}
@@ -255,6 +252,21 @@ function Showcase(props) {
                         layout="carousel"
                         hasMore={limits.tollywood < tollywood_songs.length}
                         onLoadMore={() => loadMore('tollywood')}
+                    />
+
+                    <div className="h-8 md:h-20"></div>
+
+                    <Heading
+                        title="Top Playlists"
+                        onViewMore={() => loadMore('playlists')}
+                    />
+                    <Playlists
+                        playlists={telugu_playlists.slice(0, limits.playlists)}
+                        setPlaylistId={props.setPlaylistId}
+                        onPlaylistClick={handleCategoryClick}
+                        layout="carousel"
+                        hasMore={limits.playlists < telugu_playlists.length}
+                        onLoadMore={() => loadMore('playlists')}
                     />
 
                     <div className="h-8 md:h-20"></div>
