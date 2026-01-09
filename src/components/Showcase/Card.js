@@ -4,7 +4,7 @@ function Card(props) {
     return (
         <div
             onClick={props.onClick}
-            className="bg-[#181818] p-4 rounded-md hover:bg-[#282828] transition-all duration-300 cursor-pointer group flex flex-col w-full"
+            className="bg-white/5 backdrop-blur-sm border border-white/5 p-4 rounded-xl hover:bg-white/10 hover:border-white/10 active:scale-95 active:opacity-90 transition-all duration-200 cursor-pointer group flex flex-col w-full shadow-lg"
         >
             <div className="relative mb-4 w-full aspect-square shadow-xl">
                 <img

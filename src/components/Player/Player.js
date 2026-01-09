@@ -335,7 +335,7 @@ function Player(props) {
 
             {/* Mini Player */}
             <div
-                className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-[#181818] border-t border-[#282828] text-white z-50 h-20 md:h-24 flex flex-col md:flex-row items-center justify-between px-4 pb-2 md:pb-0"
+                className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-[#181818]/90 backdrop-blur-md border-t border-[#282828] text-white z-50 h-20 md:h-24 flex flex-col md:flex-row items-center justify-between px-4 pb-2 md:pb-0"
                 onClick={() => setIsFullScreen(true)}
             >
                 {/* Progress Bar (Mobile: Top overlay, Desktop: Inline in center) */}

@@ -242,6 +242,8 @@ function Showcase(props) {
                         onLoadMore={() => loadMore('playlists')}
                     />
 
+                    <div className="h-8 md:h-20"></div>
+
                     <Heading
                         title="Tollywood Trending"
                         onViewMore={() => loadMore('tollywood')}
@@ -254,6 +256,8 @@ function Showcase(props) {
                         hasMore={limits.tollywood < tollywood_songs.length}
                         onLoadMore={() => loadMore('tollywood')}
                     />
+
+                    <div className="h-8 md:h-20"></div>
 
                     <Heading
                         title="Bollywood Trending"

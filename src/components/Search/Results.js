@@ -8,8 +8,13 @@ function Results(props) { // query
 
     // Search for the song once the component renders
     useEffect(() => {
-        search(props.query)
+        const timeoutId = setTimeout(() => {
+            search(props.query)
+        }, 500)
+
         document.title = `'${props.query}' - VibeBox`
+
+        return () => clearTimeout(timeoutId)
     }, [props.query])
 
     const [results, setResults] = useState([]) //the results obtained from search()

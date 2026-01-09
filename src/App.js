@@ -47,7 +47,7 @@ const MobileHeader = ({ setIsMobileMenuOpen }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="md:hidden p-4 bg-black flex items-center justify-between border-b border-[#282828] sticky top-0 z-40">
+    <div className="md:hidden p-4 bg-black/80 backdrop-blur-md flex items-center justify-between border-b border-[#282828] sticky top-0 z-40">
       <div className="flex items-center gap-3">
         {location.pathname !== '/' && location.pathname !== '/home' && (
           <button onClick={() => navigate(-1)} className="text-white p-1">
@@ -105,15 +105,23 @@ function App() {
     <Router>
       <ErrorBoundary>
         <RedirectToHome />
-        <div className="flex h-screen bg-black text-white overflow-hidden font-sans selection:bg-[#1db954] selection:text-black">
+        <div className="flex h-screen bg-black text-white overflow-hidden font-sans selection:bg-[#1db954] selection:text-black relative">
+
+          {/* Global Ambient Background */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-[#1db954]/20 rounded-full blur-[100px] animate-pulse"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-[#1e40af]/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute top-[20%] right-[20%] w-[20vw] h-[20vw] bg-[#7e22ce]/10 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+          </div>
+
           <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
           {/* Main Content Area */}
-          <div className="flex-1 flex flex-col relative overflow-hidden">
+          <div className="flex-1 flex flex-col relative overflow-hidden z-10">
             {/* Top Mobile Nav (Visible only on mobile) */}
             <MobileHeader setIsMobileMenuOpen={setIsMobileMenuOpen} />
 
-            <div className="flex-1 overflow-y-auto bg-[#121212] relative scrollbar-hide">
+            <div className="flex-1 overflow-y-auto bg-transparent relative scrollbar-hide">
               <LoadingBar
                 color='#1db954'
                 progress={progress}

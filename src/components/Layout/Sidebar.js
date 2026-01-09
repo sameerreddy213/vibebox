@@ -20,7 +20,7 @@ function Sidebar({ isOpen, onClose }) {
 
             {/* Sidebar Content */}
             <div className={`
-                bg-black h-full flex-col border-r border-[#282828]
+                bg-black/30 backdrop-blur-xl h-full flex-col border-r border-white/10
                 fixed md:static inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>

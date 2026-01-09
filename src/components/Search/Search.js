@@ -14,7 +14,7 @@ function Search(props) {
     }, [searchParams]);
     return (
         <div className={props.theme}>
-            <div className="py-24">
+            <div className="pt-4 pb-24">
 
                 <SearchBox setQuery={setQuery} setProgress={props.setProgress} initialValue={query} />
                 {query && <Results query={query} type={searchParams.get("type")} setProgress={props.setProgress} setDetails={props.setDetails} setAlbumId={props.setAlbumId} setPlaylistId={props.setPlaylistId} />}
