@@ -416,7 +416,7 @@ function Player(props) {
 
             {/* Mini Player */}
             <div
-                className="fixed bottom-[70px] md:bottom-0 left-0 right-0 bg-black/60 backdrop-blur-xl backdrop-saturate-150 border-t border-white/10 text-white z-50 h-[72px] md:h-24 flex flex-col md:flex-row items-center justify-between px-4 pb-1 md:pb-0 transition-all duration-300 rounded-t-2xl md:rounded-none shadow-2xl md:shadow-none mx-2 md:mx-0"
+                className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-gradient-to-r from-black/90 to-[#121212]/90 backdrop-blur-xl backdrop-saturate-150 border-t border-white/10 text-white z-50 h-[68px] md:h-24 flex flex-row items-center justify-between px-3 md:px-4 transition-all duration-300 rounded-t-xl md:rounded-none shadow-2xl md:shadow-none"
                 onClick={() => setIsFullScreen(true)}
             >
                 {/* Progress Bar (Mobile: Top overlay, Desktop: Inline in center) */}
@@ -430,13 +430,18 @@ function Player(props) {
                 <audio ref={audioRef} src={props.details.downloadUrl && props.details.downloadUrl.length > 0 ? (props.details.downloadUrl[props.details.downloadUrl.length - 1].url || '') : ''} />
 
                 {/* Left: Song Info */}
-                <div className="flex items-center flex-1 min-w-0 max-w-full md:max-w-[30%] mr-2 md:mr-4 pt-1 md:pt-0">
-                    <img
-                        src={props.details.image && props.details.image.length > 0 ? (props.details.image[props.details.image.length - 1].url || '') : ''}
-                        alt="cover"
-                        className="h-10 w-10 md:h-14 md:w-14 object-cover rounded-lg shadow-lg mr-3"
-                        onError={(e) => { e.target.src = 'https://www.scdn.co/i/_global/twitter_card-default.jpg' }}
-                    />
+                <div className="flex items-center flex-1 min-w-0 max-w-full md:max-w-[30%] mr-2 md:mr-4">
+                    <div className={`relative flex-shrink-0 mr-3 ${isPlaying ? 'animate-[spin_8s_linear_infinite]' : ''}`}>
+                        {/* Vinyl Center Hole Effect (Optional, maybe too small to see, just standard round image is fine) */}
+                        <img
+                            src={props.details.image && props.details.image.length > 0 ? (props.details.image[props.details.image.length - 1].url || '') : ''}
+                            alt="cover"
+                            className="h-10 w-10 md:h-14 md:w-14 object-cover rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)] border border-white/10"
+                            onError={(e) => { e.target.src = 'https://www.scdn.co/i/_global/twitter_card-default.jpg' }}
+                        />
+                        <div className="absolute inset-0 rounded-full border border-black/10"></div>
+                    </div>
+
                     <div className="flex flex-col truncate pr-2 w-full justify-center">
                         <Marquee text={props.details.name ? props.details.name.replace(/&quot;/g, '"') : ''} className="text-sm font-semibold text-white leading-tight" />
                         <span className="text-[11px] md:text-xs text-gray-300 truncate font-medium">
@@ -446,7 +451,7 @@ function Player(props) {
                 </div>
 
                 {/* Center: Controls (Mobile: Right aligned, simplified) */}
-                <div className="flex items-center md:flex-col justify-center md:flex-1 w-auto pt-1 md:pt-0">
+                <div className="flex items-center md:flex-col justify-end md:justify-center md:flex-1 w-auto min-w-fit">
                     <div className="flex items-center gap-3 md:gap-6">
                         <button
                             onClick={(e) => { e.stopPropagation(); setIsShuffle(!isShuffle); }}
