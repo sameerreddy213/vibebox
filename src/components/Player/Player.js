@@ -53,13 +53,17 @@ function Player(props) {
             const currentSong = props.details;
             let query = "";
 
-            // Strategy 1: Artist
-            if (currentSong.artists?.primary?.length > 0) {
+            // Strategy 1: Album/Movie (Highest Priority - User Request)
+            if (currentSong.album?.name) {
+                query = `${currentSong.album.name} Songs`;
+            }
+            // Strategy 2: Artist
+            else if (currentSong.artists?.primary?.length > 0) {
                 query = `${currentSong.artists.primary[0].name} Songs`;
             } else if (currentSong.primaryArtists) {
                 query = `${currentSong.primaryArtists.split(',')[0]} Songs`;
             }
-            // Strategy 2: Language
+            // Strategy 3: Language
             else if (currentSong.language) {
                 query = `${currentSong.language} Songs`;
             } else {
