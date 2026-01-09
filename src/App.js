@@ -123,7 +123,7 @@ function App() {
               />
               <Alert message={alert} theme="dark" />
 
-              <div className="p-4 md:p-8 pb-32"> {/* pb-32 makes room for player */}
+              <div className="pb-32 md:p-8"> {/* pb-32 makes room for player */}
                 <Suspense fallback={
                   <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1db954]"></div>

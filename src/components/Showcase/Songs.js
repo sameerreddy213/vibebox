@@ -9,7 +9,7 @@ function Songs(props) {
     return (
         <div className={
             isCarousel
-                ? "flex overflow-x-auto gap-4 snap-x pr-4 scrollbar-hide md:grid md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 md:gap-4 md:overflow-visible"
+                ? "flex overflow-x-auto gap-4 snap-x px-4 scrollbar-hide md:grid md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 md:gap-4 md:overflow-visible"
                 : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
         }>
             {props.songs.map((song) => {

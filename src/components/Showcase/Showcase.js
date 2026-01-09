@@ -227,7 +227,20 @@ function Showcase(props) {
     return (
         <div className={props.theme}>
             <section className="text-black dark:text-gray-400 bg-light-100 dark:bg-deep-900 body-font justify-center py-5">
-                <div className="container px-5 pt-8 pb-24 mx-auto mb-0 ">
+                <div className="w-full md:container md:mx-auto md:px-5 pt-8 pb-24 mb-0">
+
+                    <Heading
+                        title="Tollywood Playlists"
+                        onViewMore={() => loadMore('playlists')}
+                    />
+                    <Playlists
+                        playlists={telugu_playlists.slice(0, limits.playlists)}
+                        setPlaylistId={props.setPlaylistId}
+                        onPlaylistClick={handleCategoryClick}
+                        layout="carousel"
+                        hasMore={limits.playlists < telugu_playlists.length}
+                        onLoadMore={() => loadMore('playlists')}
+                    />
 
                     <Heading
                         title="Tollywood Trending"
@@ -252,20 +265,6 @@ function Showcase(props) {
                         layout="carousel"
                         hasMore={limits.bollywood < bollywood_songs.length}
                         onLoadMore={() => loadMore('bollywood')}
-                    />
-
-
-                    <Heading
-                        title="Tollywood Playlists"
-                        onViewMore={() => loadMore('playlists')}
-                    />
-                    <Playlists
-                        playlists={telugu_playlists.slice(0, limits.playlists)}
-                        setPlaylistId={props.setPlaylistId}
-                        onPlaylistClick={handleCategoryClick}
-                        layout="carousel"
-                        hasMore={limits.playlists < telugu_playlists.length}
-                        onLoadMore={() => loadMore('playlists')}
                     />
 
 

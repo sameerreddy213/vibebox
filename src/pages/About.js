@@ -38,6 +38,21 @@ function About(props) {
                         </a>
                     </div>
 
+                    {/* Company Info */}
+                    <div className="flex flex-col items-center justify-center mb-16 bg-[#181818] p-8 rounded-xl border border-[#282828] max-w-2xl mx-auto shadow-lg hover:border-[#1db954] transition-colors group">
+                        <h2 className="text-sm text-[#1db954] tracking-widest font-bold uppercase mb-2">Company Name</h2>
+                        <h1 className="text-2xl font-bold text-center text-white mb-4">SR NOVA TECH PRIVATE LIMITED</h1>
+                        <a
+                            href="https://sr-nova-tech.vercel.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center bg-[#1db954] text-white border-0 py-2 px-6 focus:outline-none hover:bg-[#1ed760] rounded text-lg font-semibold transition-colors"
+                        >
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                            Visit Website
+                        </a>
+                    </div>
+
                     {/* Features Grid */}
                     <div className="flex flex-col text-center mb-8">
                         <h2 className="text-sm text-gray-500 tracking-widest font-medium title-font mb-1 uppercase">Key Features</h2>
