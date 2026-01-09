@@ -308,78 +308,11 @@ function Player(props) {
 
 
 
-    // Lyrics State
-    const [showLyrics, setShowLyrics] = useState(false);
-    const [lyrics, setLyrics] = useState(null);
-    const [lyricsLoading, setLyricsLoading] = useState(false);
-
-    const fetchLyrics = async () => {
-        if (!props.details) return;
-        setLyricsLoading(true);
-        setLyrics(null);
-        try {
-            const uri = `/api/lyrics?id=${props.details.id}`;
-            const response = await fetch(uri);
-            const data = await response.json();
-            if (data.success && data.data) {
-                setLyrics(data.data);
-            } else {
-                setLyrics(null);
-            }
-        } catch (e) {
-            console.error("Lyrics fetch failed", e);
-            setLyrics(null);
-        }
-        setLyricsLoading(false);
-    }
-
-    useEffect(() => {
-        if (showLyrics) {
-            fetchLyrics();
-        }
-    }, [showLyrics, props.details?.id]);
-
-    // Helpers for Lyrics Syncing (if lyrics.lyrics is synced)
-    // Assuming API returns { lyrics: "..." } plain text or synced JSON
-    // Currently most unofficial APIs return plain text or simple HTML.
-    // If it's plain text, we just show it.
-
     // Hide player if no song is selected
     if (!props.details) return null;
 
     return (
         <>
-            {/* Lyrics Overlay */}
-            {showLyrics && (
-                <div className="fixed inset-0 z-[70] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 transition-opacity duration-300">
-                    <button
-                        onClick={() => setShowLyrics(false)}
-                        className="absolute top-6 right-6 text-white hover:text-gray-300 z-[80]"
-                    >
-                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-
-                    <div className="w-full max-w-2xl text-center overflow-y-auto h-full scrollbar-hide py-10">
-                        <h2 className="text-2xl font-bold text-white mb-2">{props.details.name.replace(/&quot;/g, '"')}</h2>
-                        <p className="text-gray-400 mb-8">{props.details.artists?.primary?.map(a => a.name).join(', ')}</p>
-
-                        {lyricsLoading ? (
-                            <div className="flex justify-center"><div className="w-8 h-8 border-4 border-[#1db954] border-t-transparent rounded-full animate-spin"></div></div>
-                        ) : lyrics ? (
-                            <div className="text-xl md:text-2xl leading-loose font-medium text-gray-300 whitespace-pre-line">
-                                {lyrics.lyrics || lyrics.snippet || "Lyrics not available."}
-                                {lyrics.copyright && <p className="text-xs text-gray-600 mt-8">© {lyrics.copyright}</p>}
-                            </div>
-                        ) : (
-                            <div className="text-gray-500">
-                                <p className="mb-4">Lyrics not available for this song.</p>
-                                <p className="text-xs">Note: Synced lyrics support depends on the API provider.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
             {/* Full Screen Player Overlay (Mobile) */}
             <div className={`fixed inset-0 z-[60] bg-gradient-to-b from-[#2b2b2b] to-black flex flex-col p-6 transition-transform duration-300 md:hidden ${isFullScreen ? 'translate-y-0' : 'translate-y-full'}`}>
 
@@ -389,10 +322,7 @@ function Player(props) {
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </button>
                     <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">Now Playing</span>
-                    {/* Lyrics Button Mobile */}
-                    <button onClick={() => setShowLyrics(true)} className="text-gray-400 hover:text-white p-2" title="Lyrics">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 3-2 3-2zm0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M9 19v2m12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 3-2 3-2z" /></svg>
-                    </button>
+                    <div className="w-8"></div> {/* Spacer for alignment */}
                 </div>
 
                 {/* Artwork */}
@@ -486,13 +416,13 @@ function Player(props) {
 
             {/* Mini Player */}
             <div
-                className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-[#181818]/90 backdrop-blur-md border-t border-[#282828] text-white z-50 h-20 md:h-24 flex flex-col md:flex-row items-center justify-between px-4 pb-2 md:pb-0"
+                className="fixed bottom-[70px] md:bottom-0 left-0 right-0 bg-black/60 backdrop-blur-xl backdrop-saturate-150 border-t border-white/10 text-white z-50 h-[72px] md:h-24 flex flex-col md:flex-row items-center justify-between px-4 pb-1 md:pb-0 transition-all duration-300 rounded-t-2xl md:rounded-none shadow-2xl md:shadow-none mx-2 md:mx-0"
                 onClick={() => setIsFullScreen(true)}
             >
                 {/* Progress Bar (Mobile: Top overlay, Desktop: Inline in center) */}
-                <div className="md:hidden absolute top-0 left-0 right-0 h-1 bg-[#535353] cursor-pointer group" onClick={handleSeek}>
+                <div className="md:hidden absolute top-0 left-4 right-4 h-[2px] bg-white/20 cursor-pointer group rounded-full overflow-hidden" onClick={(e) => { e.stopPropagation(); handleSeek(e); }}>
                     <div
-                        className="h-full bg-white relative group-hover:bg-[#1db954]"
+                        className="h-full bg-[#1db954] relative shadow-[0_0_10px_rgba(29,185,84,0.5)]"
                         style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
                     ></div>
                 </div>
@@ -500,57 +430,56 @@ function Player(props) {
                 <audio ref={audioRef} src={props.details.downloadUrl && props.details.downloadUrl.length > 0 ? (props.details.downloadUrl[props.details.downloadUrl.length - 1].url || '') : ''} />
 
                 {/* Left: Song Info */}
-                <div className="flex items-center flex-1 min-w-0 max-w-full md:max-w-[30%] mr-4">
+                <div className="flex items-center flex-1 min-w-0 max-w-full md:max-w-[30%] mr-2 md:mr-4 pt-1 md:pt-0">
                     <img
                         src={props.details.image && props.details.image.length > 0 ? (props.details.image[props.details.image.length - 1].url || '') : ''}
                         alt="cover"
-                        className="h-12 w-12 md:h-14 md:w-14 object-cover rounded shadow-md mr-3"
+                        className="h-10 w-10 md:h-14 md:w-14 object-cover rounded-lg shadow-lg mr-3"
                         onError={(e) => { e.target.src = 'https://www.scdn.co/i/_global/twitter_card-default.jpg' }}
                     />
-                    <div className="flex flex-col truncate pr-2 w-full">
-                        <Marquee text={props.details.name ? props.details.name.replace(/&quot;/g, '"') : ''} className="text-sm font-semibold hover:underline cursor-pointer text-white" />
-                        <span className="text-xs text-gray-400 truncate hover:text-white cursor-pointer">
+                    <div className="flex flex-col truncate pr-2 w-full justify-center">
+                        <Marquee text={props.details.name ? props.details.name.replace(/&quot;/g, '"') : ''} className="text-sm font-semibold text-white leading-tight" />
+                        <span className="text-[11px] md:text-xs text-gray-300 truncate font-medium">
                             {props.details.artists?.primary?.map(a => a.name).join(', ') || props.details.primaryArtists || 'Unknown'}
                         </span>
                     </div>
                 </div>
 
                 {/* Center: Controls (Mobile: Right aligned, simplified) */}
-                <div className="flex items-center md:flex-col justify-center md:flex-1 w-auto">
-                    <div className="flex items-center gap-4 md:gap-6 mb-0 md:mb-1">
+                <div className="flex items-center md:flex-col justify-center md:flex-1 w-auto pt-1 md:pt-0">
+                    <div className="flex items-center gap-3 md:gap-6">
                         <button
-                            onClick={() => setIsShuffle(!isShuffle)}
-                            className={`hidden md:block hover:text-white ${isShuffle ? 'text-[#1db954]' : 'text-gray-400'}`}
+                            onClick={(e) => { e.stopPropagation(); setIsShuffle(!isShuffle); }}
+                            className={`hidden md:block hover:text-white transition-colors ${isShuffle ? 'text-[#1db954]' : 'text-gray-400'}`}
                             title="Shuffle"
                         >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-7.5V10h-.25A.75.75 0 018 9.25v-1.5A.75.75 0 018.75 7H14a.75.75 0 01.75.75v10.5a.75.75 0 01-1.5 0v-5.5H10V18a8 8 0 100-16z"></path></svg>
                         </button>
 
-                        <button className="text-gray-300 hover:text-white" onClick={handlePrev}>
-                            <svg className="w-6 h-6 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11 19l-7-7 7-7v14z"></path></svg> {/* Prev */}
+                        <button className="text-gray-300 hover:text-white transition-transform active:scale-90" onClick={(e) => { e.stopPropagation(); handlePrev(); }}>
+                            <svg className="w-7 h-7 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11 19l-7-7 7-7v14z"></path></svg>
                         </button>
 
                         <button
-                            onClick={handlePlayPause}
-                            className="w-8 h-8 md:w-8 md:h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform"
+                            onClick={(e) => { e.stopPropagation(); handlePlayPause(); }}
+                            className="w-10 h-10 md:w-8 md:h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg"
                         >
                             {isPlaying ? (
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"></path></svg>
+                                <svg className="w-5 h-5 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"></path></svg>
                             ) : (
-                                <svg className="w-5 h-5 pl-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                <svg className="w-5 h-5 md:w-5 md:h-5 pl-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
                             )}
                         </button>
 
-                        <button className="text-gray-300 hover:text-white" onClick={() => handleNext(false)}>
-                            <svg className="w-6 h-6 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M4 19l7-7-7-7v14z"></path><path d="M13 5v14l7-7z"></path></svg> {/* Next */}
+                        <button className="text-gray-300 hover:text-white transition-transform active:scale-90" onClick={(e) => { e.stopPropagation(); handleNext(false); }}>
+                            <svg className="w-7 h-7 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M4 19l7-7-7-7v14z"></path><path d="M13 5v14l7-7z"></path></svg>
                         </button>
 
                         <button
-                            onClick={() => setRepeatMode((prev) => (prev + 1) % 3)}
-                            className={`hidden md:block hover:text-white ${repeatMode > 0 ? 'text-[#1db954]' : 'text-gray-400'}`}
+                            onClick={(e) => { e.stopPropagation(); setRepeatMode((prev) => (prev + 1) % 3); }}
+                            className={`hidden md:block hover:text-white transition-colors ${repeatMode > 0 ? 'text-[#1db954]' : 'text-gray-400'}`}
                             title={repeatMode === 2 ? "Repeat One" : (repeatMode === 1 ? "Repeat All" : "Repeat Off")}
                         >
-                            {/* Using loop icon, add a dot if Repeat One (simplified styling for now) */}
                             <div className="relative">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                                 {repeatMode === 2 && <span className="absolute -top-1 -right-1 text-[10px] font-bold">1</span>}
@@ -559,7 +488,7 @@ function Player(props) {
                     </div>
 
                     {/* Scrubber (Desktop Only) */}
-                    <div className="hidden md:flex w-full items-center justify-center gap-2 text-xs text-gray-400 font-mono">
+                    <div className="hidden md:flex w-full items-center justify-center gap-2 text-xs text-gray-400 font-mono mt-1" onClick={(e) => e.stopPropagation()}>
                         <span>{formatTime(currentTime)}</span>
                         <input
                             type="range"
@@ -577,12 +506,8 @@ function Player(props) {
                 </div>
 
                 {/* Right: Volume & Download (Desktop Only) */}
-                <div className="hidden md:flex items-center justify-end w-[30%] gap-4">
-                    {/* Lyrics Button Desktop */}
-                    <button onClick={() => setShowLyrics(true)} className="text-gray-400 hover:text-white" title="Lyrics">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 3-2 3-2zm0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M9 19v2m12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 3-2 3-2z" /></svg>
-                    </button>
-                    <button onClick={downloadSong} className="text-gray-400 hover:text-white" title="Download Song">
+                <div className="hidden md:flex items-center justify-end w-[30%] gap-4" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={downloadSong} className="text-gray-400 hover:text-white transition-colors" title="Download Song">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
@@ -611,5 +536,6 @@ function Player(props) {
         </>
     )
 }
+
 
 export default Player

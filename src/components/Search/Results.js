@@ -143,8 +143,9 @@ function Results(props) { // query
                                     async () => {
                                         if (isSong) {
                                             let details = await getSongDetails(song.id)
+                                            props.setQueue([details]); // Set queue to this song so "Next" triggers auto-play
                                             props.setDetails(details)
-                                            // navigate("/listen") // No longer navigating, player is global
+                                            // navigate("/listen") 
                                         }
                                         else if (song.type.toUpperCase() == "ALBUM") {
                                             props.setAlbumId(song.id)

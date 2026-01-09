@@ -230,12 +230,22 @@ function Showcase(props) {
 
                     {/* 1. Hero Section */}
                     <div className="px-4 md:px-0 pt-4 md:pt-8">
-                        {heroItem && <HeroSection item={heroItem} onPlay={(item) => props.setDetails(item)} />}
+                        {heroItem && <HeroSection item={heroItem} onPlay={(item) => {
+                            props.setQueue([item]);
+                            props.setDetails(item);
+                        }} />}
                     </div>
 
                     {/* 2. Quick Access Grid (Good Morning/Recently Played) */}
                     <div className="px-4 md:px-0">
-                        <QuickGrid onPlay={(item) => props.setDetails(item)} />
+                        <QuickGrid onPlay={(item) => {
+                            // If it's a lightweight item, we might need to fetch details, 
+                            // but usually QuickGrid items are from history (heavy) or static (handled).
+                            // We'll assume history items are heavy. 
+                            // If it plays and fails, Player.js handles error now?
+                            props.setQueue([item]);
+                            props.setDetails(item);
+                        }} />
                     </div>
 
                     <div className="h-4 md:h-8"></div>
