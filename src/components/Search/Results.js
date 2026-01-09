@@ -10,7 +10,7 @@ function Results(props) { // query
     useEffect(() => {
         search(props.query)
         document.title = `'${props.query}' - VibeBox`
-    }, [])
+    }, [props.query])
 
     const [results, setResults] = useState([]) //the results obtained from search()
 

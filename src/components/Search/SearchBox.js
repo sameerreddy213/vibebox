@@ -31,6 +31,14 @@ function SearchBox(props) {
                             type="text"
                             id="query"
                             name="query"
+                            defaultValue={props.initialValue}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                clearTimeout(window.searchTimeout);
+                                window.searchTimeout = setTimeout(() => {
+                                    props.setQuery(val);
+                                }, 500);
+                            }}
                             placeholder="What do you want to listen to?"
                             className="w-full bg-[#181818] rounded-full border border-[#282828] focus:border-[#1db954] focus:ring-1 focus:ring-[#1db954] text-base outline-none text-white py-3 px-6 leading-8 transition-colors duration-200 ease-in-out placeholder-gray-500 shadow-md"
                         />
