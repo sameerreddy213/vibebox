@@ -73,36 +73,66 @@ function Player(props) {
             props.showAlert(`Autoplaying related to: ${query}...`);
             props.setProgress(30);
 
+            // Step 1: Search
             const searchUri = `/api/search?query=${encodeURIComponent(query)}`;
             const response = await fetch(searchUri);
             const resp = await response.json();
 
             if (!resp.success || !resp.data) {
                 props.showAlert("No related songs found.");
+                props.setProgress(100);
                 return;
             }
 
-            let newSongs = [];
+            let searchResults = [];
             if (resp.data.songs?.results) {
-                newSongs = resp.data.songs.results;
-            } else if (resp.data.results) { // Fallback for some API structures
-                newSongs = resp.data.results;
+                searchResults = resp.data.songs.results;
+            } else if (resp.data.results) {
+                searchResults = resp.data.results;
             }
 
-            // Filter out duplicates from current queue logic could go here, but simple append is okay for now
-            // We need to match the structure expected by setQueue/Player
+            if (searchResults.length === 0) {
+                props.showAlert("No songs found.");
+                props.setProgress(100);
+                return;
+            }
+
+            // Step 2: Fetch Full Details (Critical for downloadUrl)
+            // Take top 5 results to keep it snappy
+            const topSongIds = searchResults.slice(0, 5).map(s => s.id).join(',');
+
+            const detailsUri = `/api/songs?ids=${topSongIds}`;
+            const detailsResponse = await fetch(detailsUri);
+            const detailsResp = await detailsResponse.json();
+
+            let newSongs = [];
+            if (detailsResp.success && detailsResp.data) {
+                newSongs = detailsResp.data; // Array of full song objects
+            }
 
             if (newSongs.length > 0) {
                 // Append to queue
-                const updatedQueue = [...props.queue, ...newSongs];
+                // Filter out duplicates from current queue to avoid mess
+                const existingIds = new Set(props.queue.map(s => s.id));
+                const uniqueNewSongs = newSongs.filter(s => !existingIds.has(s.id));
+
+                if (uniqueNewSongs.length === 0) {
+                    props.showAlert("No new related songs found.");
+                    props.setProgress(100);
+                    return;
+                }
+
+                const updatedQueue = [...props.queue, ...uniqueNewSongs];
                 props.setQueue(updatedQueue);
+
                 // Play first new song
-                const nextSongIndex = props.queue.length; // Index of first new song
+                // We appended, so the next song is at the old length index
+                const nextSongIndex = props.queue.length;
                 if (updatedQueue[nextSongIndex]) {
                     props.setDetails(updatedQueue[nextSongIndex]);
                 }
             } else {
-                props.showAlert("No new songs found to autoplay.");
+                props.showAlert("Unable to fetch song details.");
             }
             props.setProgress(100);
 
