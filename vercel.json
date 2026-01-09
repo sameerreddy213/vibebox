@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/:match*",
-            "destination": "https://jio-savan-unofficial-api.vercel.app/:match*"
+            "destination": "https://jio-savan-unofficial-api.vercel.app/api/:match*"
         }
     ]
 }
