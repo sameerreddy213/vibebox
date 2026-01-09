@@ -235,20 +235,36 @@ function Player(props) {
     }
 
     const handlePrev = () => {
+        // User Request: "if previous song button is clicked it should play last listened song"
+        // Removed the "restart if > 3s" check to force navigation.
+
         if (!props.queue || props.queue.length === 0) return;
 
-        // If song has played for more than 3 sec, restart it
-        if (audioRef.current.currentTime > 3) {
-            audioRef.current.currentTime = 0;
-            return;
-        }
-
         const currentIndex = props.queue.findIndex(s => s.id === props.details.id);
+
         if (currentIndex > 0) {
+            // Normal queue navigation
             props.setDetails(props.queue[currentIndex - 1]);
         } else {
-            // If first song, go to last? Or stay. Let's stay/restart.
-            audioRef.current.currentTime = 0;
+            // Start of queue - Try Global History
+            try {
+                const history = JSON.parse(localStorage.getItem('recentlyPlayed') || '[]');
+                // history[0] is current song (added in useEffect)
+                // history[1] is the previous song
+                if (history.length > 1) {
+                    const prevSong = history[1];
+                    props.setDetails(prevSong);
+                    // We don't necessarily update queue here, 
+                    // so clicking 'Next' will likely jump back to the start of the current queue 
+                    // or fetch related if not found, which is acceptable flow.
+                } else {
+                    // No history, restart current
+                    audioRef.current.currentTime = 0;
+                }
+            } catch (e) {
+                console.error("History navigation failed", e);
+                audioRef.current.currentTime = 0;
+            }
         }
     }
 
